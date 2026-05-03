@@ -6,4 +6,13 @@ load_dotenv("config/.env")
 
 
 normalizer = Normalizer()
-print(normalizer.load(os.getenv("TRAIN_RAW_DIR")))
+normalizer.load(os.getenv("TRAIN_RAW_DIR"))
+normalizer.strip_gutenberg()
+normalizer.sentence_tokenize()
+normalizer.normalize()
+normalizer.word_tokenize();
+# print(normalizer.texts)
+# print(normalizer.sentences)
+print(normalizer.words)
+
+
