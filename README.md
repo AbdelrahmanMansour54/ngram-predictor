@@ -4,7 +4,7 @@ This project builds a next-word prediction model trained on classic books from P
 
 ## Requirements
 
-- Python 3.10 or higher
+- Python 3.12 or higher
 - All dependencies are listed in `requirements.txt`
 
 ## Setup
