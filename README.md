@@ -13,10 +13,11 @@ This project builds a next-word prediction model trained on classic books from P
 
         git clone https://github.com/AbdelrahmanMansour54/ngram-predictor
 
-2. Create and activate a conda environment:
+2. Create and activate a uv environment:
 
-        conda create -n ngram python=3.10
-        conda activate ngram
+        uv init
+        uv venv
+        .venv/scripts/activate
 
 3. Install dependencies:
 
@@ -29,18 +30,18 @@ This project builds a next-word prediction model trained on classic books from P
 
 5. Fill in `config/.env` with your settings (see `.env` section below)
 
-6. Download your `.txt` books from Project Gutenberg and place them inside `data/raw/train/`
+6. Download your `.txt` books from Project Gutenberg and place them inside `./data/raw/train/`
 
 ## config/.env
 
 Create a file called `.env` inside the `config/` folder with the following variables:
 
-        TRAIN_RAW_DIR=data/raw/train/
-        EVAL_RAW_DIR=data/raw/eval/
-        TRAIN_TOKENS=data/processed/train_tokens.txt
-        EVAL_TOKENS=data/processed/eval_tokens.txt
-        MODEL=data/model/model.json
-        VOCAB=data/model/vocab.json
+        TRAIN_RAW_DIR=./data/raw/train/
+        EVAL_RAW_DIR=./data/raw/eval/
+        TRAIN_TOKENS=./data/processed/train_tokens.txt
+        EVAL_TOKENS=./data/processed/eval_tokens.txt
+        MODEL=./data/model/model.json
+        VOCAB=./data/model/vocab.json
         UNK_THRESHOLD=3
         TOP_K=3
         NGRAM_ORDER=4
