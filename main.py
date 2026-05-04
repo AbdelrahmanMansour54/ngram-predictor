@@ -2,17 +2,19 @@ from src.data_prep.normalizer import Normalizer
 from dotenv import load_dotenv
 import os
 
-load_dotenv("config/.env")
 
+def main():
+    load_dotenv("config/.env")
+    normalizer = Normalizer()
+    all_sentences = []
+    normalizer.load(os.getenv("TRAIN_RAW_DIR"))
+    for text in normalizer.texts:
+        text = normalizer.strip_gutenberg(text)
+        sentence = normalizer.sentence_tokenize(text)
+        for s in sentence:
+            s = normalizer.normalize(s)
+            all_sentences.append(s)
+    normalizer.save(all_sentences,os.getenv("TRAIN_TOKENS"))
 
-normalizer = Normalizer()
-normalizer.load(os.getenv("TRAIN_RAW_DIR"))
-normalizer.strip_gutenberg()
-normalizer.sentence_tokenize()
-normalizer.normalize()
-normalizer.word_tokenize();
-# print(normalizer.texts)
-# print(normalizer.sentences)
-print(normalizer.words)
-
-
+if __name__ == "__main__":
+    main()

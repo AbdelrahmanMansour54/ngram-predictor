@@ -1,7 +1,6 @@
 import pathlib
 import string
 import nltk
-import re
 class Normalizer:
     """
     Loading and handling all raw data
@@ -17,8 +16,6 @@ class Normalizer:
        the raw text from all loaded files.
        """
        self.texts = []
-       self.sentences = []
-       self.words = []
 
     def load(self,folder_path):
         """
@@ -28,53 +25,157 @@ class Normalizer:
             folder_path : Path to the folder containing the files 
         """
         for files in pathlib.Path(folder_path).glob('*.txt'):
-            if files.name == "test.txt":
              with open(files,'r',encoding='UTF-8') as txt_files:
                 self.texts.append(txt_files.read())
         
     
-    def strip_gutenberg(self):
+    def strip_gutenberg(self,text):
         """
         Remove all text before and including: *** START OF THE PROJECT GUTENBERG EBOOK ... ***
         Remove all text from and including: *** END OF THE PROJECT GUTENBERG EBOOK ... ***
 
         args:
-            Text : the raw txt from training set
+            Text : The raw txt from training set
+
+        return:
+            Str : The text with the header and footer removed
         """
-        for i,text in enumerate(self.texts):
-            start_Str = "*** START OF THE PROJECT GUTENBERG EBOOK"
-            end_Str = "*** END OF THE PROJECT GUTENBERG EBOOK"
-            start_ind = text.find(start_Str)
-            end_ind = text.find(end_Str)
-            new_line_ind = text.find('\n',start_ind)
-            self.texts[i] = text[new_line_ind:end_ind]
+        start_Str = "*** START OF THE PROJECT GUTENBERG EBOOK"
+        end_Str = "*** END OF THE PROJECT GUTENBERG EBOOK"
+        start_ind = text.find(start_Str)
+        end_ind = text.find(end_Str)
+        new_line_ind = text.find('***',start_ind+1)+3
+        return text[new_line_ind:end_ind]
     
-    def normalize(self):
+
+    def lowercase(self,text):
+        """
+        Lowercase all text
+
+         args:
+            Text : The raw txt from training set
+
+        return:
+            Str : The text with all character lower cases
+        """
+        return text.lower()
+
+
+    def remove_punctuation(self,text):
+        """
+        	Remove all punctuation
+
+        args:
+            Text : The raw txt from training set
+
+        return:
+            Str : The text with all punctuation removed
+        """
+        trans_table = str.maketrans('','',string.punctuation)
+        return text.translate(trans_table)
+
+    def remove_numbers(self,text):
+        """
+        Remove all numbers
+
+        args:
+            Text : The raw txt from training set
+
+        return:
+            Str : The text with all digits removed
+        """
+        trans_table = str.maketrans('','',string.digits)
+        return text.translate(trans_table)
+
+    def remove_whitespace(self,text):
+        """
+        Remove White spaces
+
+        args:
+            Text : The raw txt from training set
+
+        return:
+            Str : The text with all extra white spaces removed
+        """
+        return ' '.join(text.split())
+
+    def normalize(self,text):
        """
         Applies lowercase, remove punctuation, remove numbers, and remove extra whitespace in order.
 
-        args :
-          Text : cleaned text after strip_gutenberg
+        args:
+            Text : The raw txt from training set
+
+        return:
+            str: Fully normalized text string after applying lowercase,remove punctuation,remove number,remove whitespaces
+
        """
-       trans_table = str.maketrans(string.ascii_uppercase,string.ascii_lowercase,string.punctuation+string.digits)
-       for i,text in enumerate(self.sentences):
-            self.sentences[i] = text.translate(trans_table)
-            self.sentences[i] = ' '.join(self.sentences[i].split())
+       text = self.lowercase(text)
+       text = self.remove_punctuation(text)
+       text = self.remove_numbers(text)
+       text = self.remove_whitespace(text)
+       return text
        
     
-    def sentence_tokenize(self):
+    def sentence_tokenize(self,text):
        """
        split text into sentences; each becomes one line in the output file.
 
        args :
          Text : cleaned text after normalize
+
+         return :
+            List[str] : List of tokenized sentences 
        """
-       for text in self.texts:
-            self.sentences.extend(nltk.sent_tokenize(text))
+       return nltk.sent_tokenize(text)
     
-    def word_tokenize(self):
+    def word_tokenize(self,text):
        """
        split each sentence it into tokens separated by a single space.
+
+       args :
+         Text : cleaned text after normalize
+
+        return :
+            List[str] : List of tokenized words 
        """
-       for sentences in self.sentences:
-            self.words.extend(nltk.word_tokenize(sentences))
+       return nltk.word_tokenize(text)
+            
+    
+    def save(self,sentences,filepath):
+        """
+        Writes a list of tokenized sentences to an output file.
+
+        Each sentence is written as one line with tokens separated by spaces.
+        Format: one sentence per line, tokens separated by a single space.
+
+        Args:
+            sentences (list[str]): List of normalized sentence strings.
+            filepath (str): Path to the output file.
+
+        Returns:
+            None.
+        """
+        with open(filepath,'w',encoding='UTF-8') as save_File:
+            for sentence in sentences:
+                save_File.write(sentence + '\n')
+
+def main():
+    from dotenv import load_dotenv
+    import os
+    load_dotenv("config/.env")
+
+    normalizer = Normalizer()
+    normalizer.load(os.getenv("TRAIN_RAW_DIR"))
+
+    all_sentences = []
+    for text in normalizer.texts:
+        text = normalizer.strip_gutenberg(text)
+        for s in normalizer.sentence_tokenize(text):
+            all_sentences.append(normalizer.normalize(s))
+
+    normalizer.save(all_sentences, os.getenv("TRAIN_TOKENS"))
+
+
+if __name__ == "__main__":
+    main()
