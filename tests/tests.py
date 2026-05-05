@@ -1,9 +1,5 @@
-from dotenv import load_dotenv
-from pathlib import Path
-import os
+n = 4
+words = ["holmes", "examined", "the", "letter","in","the","woods","while","he","was","awake"]
 
-env_path = Path(__file__).parent / "config" / ".env"
-print("Looking for .env at:", env_path)
-print("File exists:", env_path.exists())
-load_dotenv(env_path)
-print("Value:", os.getenv("TRAIN_RAW_DIR"))
+for i in range(len(words) - n + 1):
+    print(words[i:i+n])

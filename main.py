@@ -23,7 +23,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--step",choices= ["dataprep","model","predict"])
     args = parser.parse_known_args()[0]
-    args = parser.parse_known_args()[0]
+
     if args.step == "all":
         run_data_prep()
     elif args.step == "data":
