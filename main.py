@@ -18,12 +18,15 @@ def run_data_prep():
     normalizer.save(all_sentences,os.getenv("TRAIN_TOKENS"))
 
 def main():
-    load_dotenv("config/.env")
 
+    load_dotenv("config/.env")
     parser = argparse.ArgumentParser()
-    parser.add_argument("--step",choices= ["data","model","predict"])
+    parser.add_argument("--step",choices= ["dataprep","model","predict"])
     args = parser.parse_known_args()[0]
-    if args.step == "data":
+    args = parser.parse_known_args()[0]
+    if args.step == "all":
+        run_data_prep()
+    elif args.step == "data":
         run_data_prep()
     elif args.step == "model":
         pass 
