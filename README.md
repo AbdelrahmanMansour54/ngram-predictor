@@ -58,7 +58,7 @@ Train the model:
 
 Run the predictor:
 
-        python main.py --step inference
+        python main.py --step predict
 
 Run everything at once:
 
