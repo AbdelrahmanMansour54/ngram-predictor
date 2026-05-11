@@ -3,11 +3,11 @@ import string
 import nltk
 class Normalizer:
     """
-    Loading and handling all raw data
+    Handles all data preparation for the n-gram pipeline.
 
-    Methods:
-        1-Load
-        2-string gutenberg
+    Responsible for loading raw .txt files, stripping Project Gutenberg
+    headers and footers, normalizing text, tokenizing into sentences and
+    words, and saving the processed output.
 
     """
     def __init__(self):

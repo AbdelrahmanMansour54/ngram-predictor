@@ -67,9 +67,9 @@ class NGramModel:
                                 self.model[key][context]={}
                             self.model[key][context][lastword] = self.model[key][context].get(lastword,0)+1
         
-        self.Compute_MLE_prob()
+        self._compute_mle_prob()
 
-    def Compute_MLE_prob(self):
+    def _compute_mle_prob(self):
         """
         compute the MLE probability for each n-gram using the counts collected in Build_counts_at_all_orders
 
@@ -120,24 +120,60 @@ class NGramModel:
             json.dump(self.vocab,file,indent=4)
 
     def load(self,vocab_filepath,model_filepath):
+        """
+        Loads the vocabulary and model probability tables from JSON files
+        into self.vocab and self.model.
+
+        Args:
+            vocab_filepath (str): Path to the vocab.json file.
+            model_filepath (str): Path to the model.json file.
+
+        Returns:
+            None. Results stored in self.vocab and self.model.
+        """
         with open(vocab_filepath,'r',encoding="UTF-8") as file:
             self.vocab = json.load(file)
         with open(model_filepath,'r',encoding="UTF-8") as file:
             self.model = json.load(file)
     
+
+    def lookup(self,context):
+        """
+        Looks up the most probable next words for a given context.
+        Tries the highest order first and backs off to lower orders
+        if the context is not found.
+
+        Args:
+            context (str): A string of words typed by the user.
+
+        Returns:
+            dict: A dictionary of {word: probability} from the highest
+                order that matches. Returns empty dict if nothing found.
+        """
+        words = context.split()
+        for ngram in range(self.ngram_order,0,-1):
+            key = str(ngram) + "gram"
+            if ngram == 1:
+                return self.model[key]
+            lookup_context = ' '.join(words[-ngram + 1:])
+            if lookup_context not in self.model[key]:
+                continue
+            else:
+                return self.model[key][lookup_context]
+        return {}
+
+
 def main():
     import os
     from dotenv import load_dotenv
-
     load_dotenv("config/.env")
     unk_threshold = int(os.getenv("UNK_THRESHOLD"))
     ngram_order = int(os.getenv("NGRAM_ORDER"))
     ngrammodel = NGramModel(unk_threshold,ngram_order)
     ngrammodel.build_vocab(os.getenv("TRAIN_TOKENS"))
     ngrammodel.build_counts_and_probabilities(os.getenv("TRAIN_TOKENS"))
-    ngrammodel.save_vocab(os.getenv("VOCAB"))
-    ngrammodel.save_model(os.getenv("MODEL"))
-    #print(ngrammodel.word_cnt)
+    ngrammodel.save_vocab(os.getenv("NGRAM_VOCAB"))
+    ngrammodel.save_model(os.getenv("NGRAM_MODEL"))
 if __name__ == "__main__":
     main()
     
