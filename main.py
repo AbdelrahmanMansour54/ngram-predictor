@@ -37,6 +37,7 @@ def run_predict():
     while True:
         txt = input(">")
         if txt.lower() == "quit":
+            print("Goodbye!")
             break
         else:
             print(f"Predictions: {list(predictor.predict_next(txt).keys())}")
@@ -52,7 +53,7 @@ def main():
         run_data_prep()
         run_model()
         run_predict()
-    elif args.step == "data":
+    elif args.step == "dataprep":
         run_data_prep()
     elif args.step == "model":
         run_model() 
