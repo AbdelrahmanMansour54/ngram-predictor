@@ -2,6 +2,24 @@ import pathlib
 import json
 class NGramModel:
 
+    """
+    Builds, stores, and exposes n-gram probability tables for next-word prediction.
+
+    Responsible for building the vocabulary from a token file, counting all
+    n-grams at every order from 1 up to NGRAM_ORDER, computing MLE probabilities,
+    and providing backoff lookup across all orders.
+
+    At inference time, lookup() attempts the highest-order context first and
+    falls back to lower orders down to 1-gram when the context is unseen.
+
+    Attributes:
+        unk_threshold (int): Minimum frequency for a word to stay in the vocabulary.
+        ngram_order (int): Maximum n-gram order to build.
+        vocab (list): List of valid vocabulary words.
+        word_counts (dict): Dictionary of word to frequency count.
+        model (dict): Nested dictionary of n-gram probability tables.
+    """
+
     def __init__(self,unk_threshold,ngram_order):
         self.unk_threshold = unk_threshold
         self.ngram_order = ngram_order
