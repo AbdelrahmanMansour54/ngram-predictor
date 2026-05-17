@@ -1,5 +1,7 @@
 import pathlib
 import json
+import logging
+logger=logging.getLogger(__name__)
 class NGramModel:
 
     """
@@ -21,6 +23,7 @@ class NGramModel:
     """
 
     def __init__(self,unk_threshold,ngram_order):
+        logger.info("Initializing Model")
         self.unk_threshold = unk_threshold
         self.ngram_order = ngram_order
         self.vocab = []
@@ -41,6 +44,7 @@ class NGramModel:
              None
 
         """
+        logger.info("Building Vocab")
         with open(pathlib.Path(filepath),'r',encoding='UTF-8') as file:
             sentences = file.readlines()
             for sentence in sentences:
@@ -51,6 +55,7 @@ class NGramModel:
             if self.word_cnt[word] >= self.unk_threshold:
                 self.vocab.append(word)
         self.vocab.append("<UNK>")
+        logger.debug(f"There are {len(self.vocab)} words in the vocab")
 
     def build_counts_and_probabilities(self,filepath):
         """
@@ -62,6 +67,7 @@ class NGramModel:
         return :
             None
         """
+        logger.info("Counting words")
         with open(pathlib.Path(filepath),'r',encoding='UTF-8') as file:
             sentences = file.readlines()
             for sentence in sentences:
@@ -96,6 +102,7 @@ class NGramModel:
         return :
             None
         """
+        logger.info("Calculating probability")
         for ngram in range(1,self.ngram_order+1,1): 
             key = str(ngram) + "gram"
             if ngram != 1:
@@ -149,11 +156,26 @@ class NGramModel:
         Returns:
             None. Results stored in self.vocab and self.model.
         """
-        with open(vocab_filepath,'r',encoding="UTF-8") as file:
-            self.vocab = json.load(file)
-        with open(model_filepath,'r',encoding="UTF-8") as file:
-            self.model = json.load(file)
-    
+        logger.info(f"Loading vocab from {vocab_filepath}")
+        try:
+            with open(vocab_filepath,'r',encoding="UTF-8") as file:
+                self.vocab = json.load(file)
+        except FileNotFoundError:
+            logger.error(f"{vocab_filepath} Not Found, run model module first")
+        except json.decoder.JSONDecodeError:
+                logger.error("Vocab.json is malformed. Re-run the Model module.")
+
+        
+        logger.info(f"Loading model from {model_filepath}")
+        try:
+            with open(model_filepath,'r',encoding="UTF-8") as file:
+                self.model = json.load(file)
+        except FileNotFoundError:
+                logger.error(f"{model_filepath} Not Found, run model module first")
+        except json.decoder.JSONDecodeError:
+                logger.error("model.json is malformed. Re-run the Model module.")
+
+
 
     def lookup(self,context):
         """
@@ -171,6 +193,8 @@ class NGramModel:
         words = context.split()
         for ngram in range(self.ngram_order,0,-1):
             key = str(ngram) + "gram"
+            if key not in self.model:
+                continue
             if ngram == 1:
                 return self.model[key]
             lookup_context = ' '.join(words[-ngram + 1:])
@@ -185,6 +209,10 @@ def main():
     import os
     from dotenv import load_dotenv
     load_dotenv("config/.env")
+    logging.basicConfig(
+            level=os.getenv("LOG_LEVEL"),
+            format="%(asctime)s [%(levelname)s] %(message)s"
+        )
     unk_threshold = int(os.getenv("UNK_THRESHOLD"))
     ngram_order = int(os.getenv("NGRAM_ORDER"))
     ngrammodel = NGramModel(unk_threshold,ngram_order)

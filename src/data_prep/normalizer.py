@@ -1,6 +1,10 @@
 import pathlib
 import string
 import nltk
+import logging
+
+logger = logging.getLogger(__name__)
+
 class Normalizer:
     """
     Handles all data preparation for the n-gram pipeline.
@@ -15,6 +19,7 @@ class Normalizer:
        Initializes the Normalizer with an empty list to store 
        the raw text from all loaded files.
        """
+       logger.info("Initalizing normalizer")
        self.texts = []
 
     def load(self,folder_path):
@@ -24,9 +29,16 @@ class Normalizer:
         args:
             folder_path : Path to the folder containing the files 
         """
-        for files in pathlib.Path(folder_path).glob('*.txt'):
-             with open(files,'r',encoding='UTF-8') as txt_files:
-                self.texts.append(txt_files.read())
+        logger.info(f"Loading raw files from {folder_path}")
+        try:
+            for file in pathlib.Path(folder_path).glob('*.txt'):
+                with open(file, 'r', encoding='UTF-8') as f:
+                    self.texts.append(f.read())
+                    logger.info(f"Loaded {file.name}")
+            logger.info(f"Finished loading {len(self.texts)} files")
+        except FileNotFoundError:
+            logger.error(f"Folder not found: {folder_path}. Check TRAIN_RAW_DIR in config/.env")
+
         
     
     def strip_gutenberg(self,text):
@@ -156,6 +168,7 @@ class Normalizer:
         Returns:
             None.
         """
+        logger.info("Saving Tokenized Sentences")
         with open(filepath,'w',encoding='UTF-8') as save_File:
             for sentence in sentences:
                 save_File.write(sentence + '\n')
@@ -165,6 +178,10 @@ def main():
     import os
     load_dotenv("config/.env")
 
+    logging.basicConfig(
+        level=os.getenv("LOG_LEVEL"),
+        format="%(asctime)s [%(levelname)s] %(message)s"
+    )
     normalizer = Normalizer()
     normalizer.load(os.getenv("TRAIN_RAW_DIR"))
 
