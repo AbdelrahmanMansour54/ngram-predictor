@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import streamlit as st
 from src.model.ngram_model import NGramModel
 from src.data_prep.normalizer import Normalizer
