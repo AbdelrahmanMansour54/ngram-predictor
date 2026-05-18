@@ -67,7 +67,8 @@ def main():
 
     model = NGramModel(
         int(os.getenv("UNK_THRESHOLD")),
-        int(os.getenv("NGRAM_ORDER"))
+        int(os.getenv("NGRAM_ORDER")),
+        os.getenv("SMOOTHING")
     )
     model.load(os.getenv("NGRAM_VOCAB"), os.getenv("NGRAM_MODEL"))
 

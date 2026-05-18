@@ -22,13 +22,14 @@ class NGramModel:
         model (dict): Nested dictionary of n-gram probability tables.
     """
 
-    def __init__(self,unk_threshold,ngram_order):
+    def __init__(self,unk_threshold,ngram_order,smoothing):
         logger.info("Initializing Model")
         self.unk_threshold = unk_threshold
         self.ngram_order = ngram_order
         self.vocab = []
         self.word_cnt = {}
         self.model = {}
+        self.smoothing = smoothing
 
 
     def build_vocab(self,filepath):
@@ -109,12 +110,18 @@ class NGramModel:
                 for context in self.model[key]:
                     total = sum(self.model[key][context].values())
                     for lastword in self.model[key][context]:
-                        probability = self.model[key][context][lastword] / total
+                        if self.smoothing:
+                            probability = (self.model[key][context][lastword]+1) / (total + len(self.vocab))
+                        else:
+                            probability = self.model[key][context][lastword] / total
                         self.model[key][context][lastword] = probability
             else:
                 total = sum(self.model[key].values())
                 for context in self.model[key]:
-                    probability = self.model[key][context] / total
+                    if self.smoothing:
+                        probability = (self.model[key][context]+1) / (total + len(self.vocab))
+                    else:
+                        probability = self.model[key][context] / total
                     self.model[key][context] = probability
                     
     def save_model(self,filepath):

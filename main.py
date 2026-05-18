@@ -25,7 +25,8 @@ def run_data_prep():
 def run_model():
     unk_threshold = int(os.getenv("UNK_THRESHOLD"))
     ngram_order = int(os.getenv("NGRAM_ORDER"))
-    ngrammodel = NGramModel(unk_threshold,ngram_order)
+    smoothing = os.getenv("SMOOTHING")
+    ngrammodel = NGramModel(unk_threshold,ngram_order,smoothing)
     ngrammodel.build_vocab(os.getenv("TRAIN_TOKENS"))
     ngrammodel.build_counts_and_probabilities(os.getenv("TRAIN_TOKENS"))
     ngrammodel.save_vocab(os.getenv("NGRAM_VOCAB"))
@@ -36,7 +37,8 @@ def run_predict():
     ngram_order = int(os.getenv("NGRAM_ORDER"))
     ngram_vocab = os.getenv("NGRAM_VOCAB")
     ngram_model = os.getenv("NGRAM_MODEL")
-    model = NGramModel(unk_threshold,ngram_order)
+    smoothing = os.getenv("SMOOTHING")
+    model = NGramModel(unk_threshold,ngram_order,smoothing)
     model.load(ngram_vocab,ngram_model)
     normalizer = Normalizer()
     predictor = Predictor(model,normalizer,os.getenv("TOP_K"))
@@ -59,7 +61,7 @@ def main():
         level=os.getenv("LOG_LEVEL"),
         format="%(asctime)s [%(levelname)s] %(message)s"
     )
-    required_keys = ["TRAIN_RAW_DIR","EVAL_RAW_DIR","TRAIN_TOKENS","EVAL_TOKENS","NGRAM_MODEL","NGRAM_VOCAB","UNK_THRESHOLD","TOP_K","NGRAM_ORDER"]
+    required_keys = ["TRAIN_RAW_DIR","EVAL_RAW_DIR","TRAIN_TOKENS","EVAL_TOKENS","NGRAM_MODEL","NGRAM_VOCAB","UNK_THRESHOLD","TOP_K","NGRAM_ORDER","SMOOTHING"]
     missing = [key for key in required_keys if os.getenv(key) is None]
     if missing:
         logger.error(f"Missing config variables: {missing}")
